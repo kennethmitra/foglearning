@@ -1,0 +1,2 @@
+class CustomDataset:
+    pass
