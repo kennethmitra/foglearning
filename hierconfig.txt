@@ -1,8 +1,8 @@
 python3 hierfavg
 --dataset mnist
 --model lenet
---num_clients 50
---num_edges 5
+--num_clients 16
+--num_edges 4
 --frac 1
 --num_local_update 6
 --num_edge_aggregation 10
@@ -16,3 +16,5 @@ python3 hierfavg
 --lr_decay_epoch 1
 --momentum 0
 --weight_decay 0
+
+python hierfavg.py  --dataset mnist  --model lenet  --num_clients 16  --num_edges 4  --frac 1  --num_local_update 6  --num_edge_aggregation 10  --num_communication 100 --batch_size 20  --iid 1 --edgeiid 1 --show_dis 1 --lr 0.01 --lr_decay 0.995 --lr_decay_epoch 1 --momentum 0 --weight_decay 0
