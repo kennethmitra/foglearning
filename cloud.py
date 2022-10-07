@@ -15,6 +15,7 @@ class Cloud():
         self.sample_registration = {}
         # self.shared_state_dict = shared_layers.state_dict()
         self.clock = []
+        self.communication_count = 0
 
     def refresh_cloudserver(self):
         self.receiver_buffer.clear()
@@ -34,6 +35,7 @@ class Cloud():
 
     def receive_from_edge(self, edge_id, eshared_state_dict):
         self.receiver_buffer[edge_id] = eshared_state_dict
+        self.communication_count += 1
         return None
 
     def aggregate(self, args):

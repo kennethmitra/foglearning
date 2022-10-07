@@ -24,6 +24,7 @@ class Client():
         self.epoch = 0
         # record the time
         self.clock = []
+        self.communication_count = 0
 
     def local_update(self, num_iter, device):
         itered_num = 0
@@ -76,6 +77,7 @@ class Client():
 
     def receive_from_edgeserver(self, shared_state_dict):
         self.receiver_buffer = shared_state_dict
+        self.communication_count += 1
         return None
 
     def sync_with_edgeserver(self):

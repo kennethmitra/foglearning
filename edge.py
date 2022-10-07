@@ -36,6 +36,7 @@ class Edge():
         self.all_trainsample_num = 0
         self.shared_state_dict = shared_layers.state_dict()
         self.clock = []
+        self.communication_count = 0
 
     def refresh_edgeserver(self):
         """
@@ -65,6 +66,7 @@ class Edge():
         :return:
         """
         self.receiver_buffer[client_id] = cshared_state_dict
+        self.communication_count += 1
         return None
 
     def aggregate(self, args):

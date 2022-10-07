@@ -354,6 +354,9 @@ def HierFAVG(args):
                 correct, total = all_clients_test(edge, clients, edge.cids, device)
                 correct_all += correct
                 total_all += total
+
+            communication_count = cloud.communication_count + np.sum([edge.communication_count for edge in edges]) + np.sum([client.communication_count for client in clients])
+
             # end interation in edges
             all_loss = sum([e_loss * e_sample for e_loss, e_sample in zip(edge_loss, edge_sample)]) / sum(edge_sample)
             avg_acc = correct_all / total_all
@@ -363,6 +366,13 @@ def HierFAVG(args):
             writer.add_scalar(f'All_Avg_Test_Acc_edgeagg',
                               avg_acc,
                               num_comm * args.num_edge_aggregation + num_edgeagg + 1)
+
+            writer.add_scalar(f'Partial_Avg_Train_loss_VS_comm_count',
+                              all_loss,
+                              communication_count)
+            writer.add_scalar(f'All_Avg_Test_Acc_edgeagg_VS_comm_count',
+                              avg_acc,
+                              communication_count)
 
         # Now begin the cloud aggregation
         for edge in edges:
@@ -378,6 +388,11 @@ def HierFAVG(args):
         writer.add_scalar(f'All_Avg_Test_Acc_cloudagg_Vtest',
                           avg_acc_v,
                           num_comm + 1)
+
+        communication_count = cloud.communication_count + np.sum([edge.communication_count for edge in edges]) + np.sum([client.communication_count for client in clients])
+        writer.add_scalar(f'All_Avg_Test_Acc_cloudagg_Vtest_VS_comm_count',
+                          avg_acc_v,
+                          communication_count)
 
     writer.close()
     print(f"The final virtual acc is {avg_acc_v}")
