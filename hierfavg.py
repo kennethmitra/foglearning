@@ -329,6 +329,9 @@ def HierFAVG(args):
             edge_sample = [0] * args.num_edges
             correct_all = 0.0
             total_all = 0.0
+
+            edgeagg_count = num_comm * args.num_edge_aggregation + num_edgeagg + 1
+
             # no edge selection included here
             # for each edge, iterate
             for i, edge in enumerate(edges):
@@ -352,6 +355,9 @@ def HierFAVG(args):
 
                 edge.aggregate(args)
                 correct, total = all_clients_test(edge, clients, edge.cids, device)
+
+                writer.add_scalar(f'Edge_Specific/Edge_ID{edge.id}_Test_Acc_vs_edgeagg', correct/total, edgeagg_count)
+
                 correct_all += correct
                 total_all += total
 
@@ -360,12 +366,12 @@ def HierFAVG(args):
             # end interation in edges
             all_loss = sum([e_loss * e_sample for e_loss, e_sample in zip(edge_loss, edge_sample)]) / sum(edge_sample)
             avg_acc = correct_all / total_all
-            writer.add_scalar(f'Partial_Avg_Train_loss',
+            writer.add_scalar(f'Partial_Avg_Train_loss_vs_edgeagg',
                               all_loss,
-                              num_comm * args.num_edge_aggregation + num_edgeagg + 1)
-            writer.add_scalar(f'All_Avg_Test_Acc_edgeagg',
+                              edgeagg_count)
+            writer.add_scalar(f'All_Avg_Test_Acc_vs_edgeagg',
                               avg_acc,
-                              num_comm * args.num_edge_aggregation + num_edgeagg + 1)
+                              edgeagg_count)
 
             writer.add_scalar(f'Partial_Avg_Train_loss_VS_comm_count',
                               all_loss,
