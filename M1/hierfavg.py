@@ -16,7 +16,7 @@ from models.cifar_cnn_3conv_layer import cifar_cnn_3conv
 from models.cifar_resnet import ResNet18
 from models.mnist_cnn import mnist_lenet
 from models.mnist_logistic import LogisticRegression
-from options import args_parser
+from M1.options import args_parser
 
 
 def get_client_class(args, clients):
