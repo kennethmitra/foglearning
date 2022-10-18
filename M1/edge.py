@@ -55,7 +55,7 @@ class Edge():
         :return: None
         """
         self.id_registration.append(client.id)
-        self.sample_registration[client.id] = len(client.train_loader.dataset)
+        self.sample_registration[client.id] = len(client.train_loader.train_ds)
         return None
 
     def receive_from_client(self, client_id, cshared_state_dict):

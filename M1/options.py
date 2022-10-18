@@ -150,7 +150,6 @@ def args_parser():
         default=0,
         help = 'GPU to be selected, 0, 1, 2, 3'
     )
-
     parser.add_argument(
         '--mtl_model',
         default=0,
