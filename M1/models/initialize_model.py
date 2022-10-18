@@ -98,7 +98,7 @@ class MTL_Model(object):
 def initialize_model(args, device):
     if args.mtl_model:
         print('Using different task specific layer for each user')
-        if args.dataset == 'cifar10':
+        if args.train_ds == 'cifar10':
             if args.model == 'cnn_complex':
                 shared_layers = cifar_cnn_3conv_shared(input_channels=3)
                 feature_out_dim = shared_layers.feature_out_dim()
@@ -113,7 +113,7 @@ def initialize_model(args, device):
             specific_layers = specific_layers.cuda(device)
     elif args.global_model:
         print('Using same global model for all users')
-        if args.dataset == 'cifar10':
+        if args.train_ds == 'cifar10':
             if args.model == 'cnn_complex':
                 shared_layers = cifar_cnn_3conv(input_channels=3, output_channels=10)
                 specific_layers = None
@@ -122,7 +122,7 @@ def initialize_model(args, device):
                 specific_layers = None
             else:
                 raise ValueError('Model not implemented for CIFAR-10')
-        elif args.dataset == 'mnist':
+        elif args.train_ds == 'mnist':
             if args.model == 'lenet':
                shared_layers = mnist_lenet(input_channels=1, output_channels=10)
                specific_layers = None

@@ -187,14 +187,14 @@ def fast_all_clients_test(v_test_loader, global_nn, device):
 
 
 def initialize_global_nn(args):
-    if args.dataset == 'mnist':
+    if args.train_ds == 'mnist':
         if args.model == 'lenet':
             global_nn = mnist_lenet(input_channels=1, output_channels=10)
         elif args.model == 'logistic':
             global_nn = LogisticRegression(input_dim=1, output_dim=10)
         else:
             raise ValueError(f"Model{args.model} not implemented for mnist")
-    elif args.dataset == 'cifar10':
+    elif args.train_ds == 'cifar10':
         if args.model == 'cnn_complex':
             global_nn = cifar_cnn_3conv(input_channels=3, output_channels=10)
         elif args.model == 'resnet18':
@@ -202,7 +202,7 @@ def initialize_global_nn(args):
         else:
             raise ValueError(f"Model{args.model} not implemented for cifar")
     else:
-        raise ValueError(f"Dataset {args.dataset} Not implemented")
+        raise ValueError(f"Dataset {args.train_ds} Not implemented")
     return global_nn
 
 
@@ -223,7 +223,7 @@ def HierFAVG(args):
     print(f'Using device {device}')
 
     # Setup logging
-    FILEOUT = f"{args.dataset}_clients{args.num_clients}_edges{args.num_edges}_" \
+    FILEOUT = f"{args.train_ds}_clients{args.num_clients}_edges{args.num_edges}_" \
               f"t1-{args.num_local_update}_t2-{args.num_edge_aggregation}" \
               f"_model_{args.model}iid{args.iid}edgeiid{args.edgeiid}epoch{args.num_communication}" \
               f"bs{args.batch_size}lr{args.lr}lr_decay_rate{args.lr_decay}" \
@@ -236,15 +236,15 @@ def HierFAVG(args):
     if args.show_dis:  # TODO figure out what this does (default false)
         for i in range(args.num_clients):
             train_loader = train_loaders[i]
-            print(len(train_loader.dataset))
+            print(len(train_loader.train_ds))
             distribution = show_distribution(train_loader, args)
             print("train dataloader {} distribution".format(i))
             print(distribution)
 
         for i in range(args.num_clients):
             test_loader = test_loaders[i]
-            test_size = len(test_loaders[i].dataset)
-            print(len(test_loader.dataset))
+            test_size = len(test_loaders[i].train_ds)
+            print(len(test_loader.train_ds))
             distribution = show_distribution(test_loader, args)
             print("test dataloader {} distribution".format(i))
             print(f"test dataloader size {test_size}")

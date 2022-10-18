@@ -376,32 +376,32 @@ def show_distribution(dataloader, args):
     return:
         percentage of each class of the label
     """
-    if args.dataset == 'mnist':
+    if args.train_ds == 'mnist':
         try:
-            labels = dataloader.dataset.dataset.train_labels.numpy()
+            labels = dataloader.train_ds.train_ds.train_labels.numpy()
         except:
             print(f"Using test_labels")
-            labels = dataloader.dataset.dataset.test_labels.numpy()
+            labels = dataloader.train_ds.train_ds.test_labels.numpy()
         # labels = dataloader.dataset.dataset.train_labels.numpy()
-    elif args.dataset == 'cifar10':
+    elif args.train_ds == 'cifar10':
         try:
-            labels = dataloader.dataset.dataset.train_labels
+            labels = dataloader.train_ds.train_ds.train_labels
         except:
             print(f"Using test_labels")
-            labels = dataloader.dataset.dataset.test_labels
+            labels = dataloader.train_ds.train_ds.test_labels
         # labels = dataloader.dataset.dataset.train_labels
-    elif args.dataset == 'fsdd':
-        labels = dataloader.dataset.labels
+    elif args.train_ds == 'fsdd':
+        labels = dataloader.train_ds.labels
     else:
-        raise ValueError("`{}` dataset not included".format(args.dataset))
-    num_samples = len(dataloader.dataset)
+        raise ValueError("`{}` dataset not included".format(args.train_ds))
+    num_samples = len(dataloader.train_ds)
     # print(num_samples)
     idxs = [i for i in range(num_samples)]
     labels = np.array(labels)
     unique_labels = np.unique(labels)
     distribution = [0] * len(unique_labels)
     for idx in idxs:
-        img, label = dataloader.dataset[idx]
+        img, label = dataloader.train_ds[idx]
         distribution[label] += 1
     distribution = np.array(distribution)
     distribution = distribution / num_samples
@@ -411,8 +411,8 @@ if __name__ == '__main__':
     args = args_parser()
     if args.cuda:
         torch.cuda.manual_seed(args.seed)
-    train_loaders, test_loaders, _, _ = get_dataset(args.dataset_root, args.dataset, args)
-    print(f"The dataset is {args.dataset} divided into {args.num_clients} clients/tasks in an iid = {args.iid} way")
+    train_loaders, test_loaders, _, _ = get_dataset(args.dataset_root, args.train_ds, args)
+    print(f"The dataset is {args.train_ds} divided into {args.num_clients} clients/tasks in an iid = {args.iid} way")
     for i in range(args.num_clients):
         train_loader = train_loaders[i]
         print(len(train_loader.dataset))
