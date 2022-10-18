@@ -45,13 +45,13 @@ def args_parser():
     parser.add_argument(
         '--batch_size',
         type=int,
-        default=10,
+        default=8,
         help='batch size when trained on client'
     )
     parser.add_argument(
         '--num_local_update',
         type=int,
-        default=32,
+        default=128,
         help='number of local gradient update steps (tau_1)'
     )
     parser.add_argument(
@@ -65,6 +65,12 @@ def args_parser():
         type=int,
         default=3,
         help='Number of devices to share with at each share round'
+    )
+    parser.add_argument(
+        '--num_total_rounds',
+        type=int,
+        default=10,
+        help='Number of total (train + share) rounds to perform'
     )
     parser.add_argument(
         '--lr',

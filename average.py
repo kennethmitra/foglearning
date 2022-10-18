@@ -5,6 +5,7 @@ from torch import nn
 def average_weights(w, s_num):
     #copy the first client's weights
     total_sample_num = sum(s_num)
+    assert(total_sample_num > 0)
     temp_sample_num = s_num[0]
     w_avg = copy.deepcopy(w[0])
     for k in w_avg.keys():  #the nn layer loop
