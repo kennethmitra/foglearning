@@ -15,16 +15,16 @@ from torchvision import transforms
 from options import args_parser
 from device import Device
 
+# Logging
+writer = SummaryWriter()
+
 # Parse args
 args = args_parser()
-
 print("========== ARGS ===========")
 for k, v in vars(args).items():
     print(f"{k}: {v}")
 print("===========================")
-
-# Logging
-writer = SummaryWriter()
+# writer.add_hparams(vars(args), name='Args')
 
 # Set seed from provided args
 torch.manual_seed(args.seed)
@@ -40,14 +40,25 @@ train_ds = datasets.MNIST('./data', download=True, train=True, transform=transfo
 test_ds = datasets.MNIST('./data', download=True, train=False, transform=transform)
 
 # Create/Initialize devices
-devices = [Device(id=devid, train_ds=train_ds, test_ds=test_ds, device=compute_device, args=args) for devid in range(args.num_devices)]
+devices = [Device(id=devid, train_ds=train_ds, test_ds=test_ds, device=compute_device, writer=writer, args=args) for
+           devid in range(args.num_devices)]
 
 
 def call_train_local(dev):
     dev.train_local(num_iter=args.num_local_update, device=compute_device)
 
 
-with Parallel(n_jobs=10) as parallel:
-    parallel(delayed(call_train_local)(dev) for dev in devices)
+def call_send_target_devices(dev):
+    dev.send_target_devices(device_list=devices)
 
-# devices[0].train_local(100, compute_device)
+
+def call_aggregate_weights(dev):
+    dev.aggregate_weights()
+
+
+with Parallel(n_jobs=10) as parallel:
+    for round in range(10):
+        parallel(delayed(call_train_local)(dev) for dev in devices)
+        parallel(delayed(call_send_target_devices)(dev) for dev in devices)
+        parallel(delayed(call_aggregate_weights)(dev) for dev in devices)
+

@@ -6,25 +6,33 @@ Decentralized learning steps:
 2. Local Training
 3. Weight sharing
 """
+import numpy as np
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from models.initialize_model import initialize_model
 import torch
-
+from copy import deepcopy
+from average import average_weights
 
 class Device:
-    def __init__(self, id, train_ds, test_ds, device, args):
+    def __init__(self, id, train_ds, test_ds, device, writer, args):
         self.id = id
         self.bs = args.batch_size
         self.train_ds = train_ds
         self.test_ds = test_ds
         self.shuffle_ds = args.shuffle_dataset
         self.model = initialize_model(args, device)
+        self.writer = writer  # Tensorboard logging
 
         # Training
         self.train_dl = DataLoader(self.train_ds, batch_size=self.bs, shuffle=self.shuffle_ds, num_workers=0)
         self.epoch = 0  # Number of times iterated through train dataset
+
+        # Aggregation
+        self.received_weights = []
+        self.target_share_devs = []
+        self.share_k_devices = args.num_share_devices
 
         # Testing
         self.test_dl = DataLoader(self.test_ds, batch_size=self.bs, shuffle=False, num_workers=0)  # Using same ds for train/test
@@ -72,11 +80,29 @@ class Device:
                 correct += (predict == labels).sum().item()
         return correct, total
 
-    def send_to_node(self):
-        pass
+    def _choose_target_devices(self, device_list):
+        idxs = np.random.choice(list(range(len(device_list))), self.share_k_devices)
+        self.target_share_devs = [device_list[i] for i in idxs]
 
-    def __receive_from_nodes(self, node_list):
-        pass
+    def send_target_devices(self, device_list):
+        self._choose_target_devices(device_list)
 
-    def aggregate_from_nodes(self, node_list):
-        pass
+        for dev in self.target_share_devs:
+            dev._receive_from_nodes(deepcopy(self.model.shared_layers.state_dict()))
+
+    def _receive_from_node(self, weights, n_samples):
+        self.received_weights.append((weights, n_samples))
+
+    def aggregate_weights(self):
+        # Add current device's weights to list
+        self.received_weights.append((deepcopy(self.model.shared_layers.state_dict())))
+
+        all_weights = [el[0] for el in self.received_weights]
+        all_samples = [el[1] for el in self.received_weights]
+
+        new_weights = average_weights(all_weights, all_samples)
+
+        self.model.update_model(new_weights)
+
+        self.received_weights.clear()
+        self.target_share_devs.clear()

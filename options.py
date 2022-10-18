@@ -4,6 +4,12 @@ import torch
 
 def args_parser():
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--run_name',
+        type=str,
+        default='RUN_NAME_BLANK',
+        help='string for the name of the run'
+    )
     # dataset and model
     parser.add_argument(
         '--dataset',
@@ -43,22 +49,22 @@ def args_parser():
         help='batch size when trained on client'
     )
     parser.add_argument(
-        '--num_communication',
-        type=int,
-        default=1,
-        help='number of communication rounds with the cloud server'
-    )
-    parser.add_argument(
         '--num_local_update',
         type=int,
         default=32,
-        help='number of local update (tau_1)'
+        help='number of local gradient update steps (tau_1)'
     )
     parser.add_argument(
-        '--num_edge_aggregation',
+        '--num_share_rounds',
         type=int,
         default=1,
-        help='number of edge aggregation (tau_2)'
+        help='number of weight sharing steps (tau_2)'
+    )
+    parser.add_argument(
+        '--num_share_devices',
+        type=int,
+        default=3,
+        help='Number of devices to share with at each share round'
     )
     parser.add_argument(
         '--lr',
