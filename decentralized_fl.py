@@ -63,7 +63,7 @@ def call_test_local(dev):
 
 
 print(f"Running on {os.cpu_count()} processes")
-with Parallel(n_jobs=os.cpu_count()) as parallel:
+with Parallel(n_jobs=os.cpu_count(),backend="threading") as parallel:
     for round in range(10):
         losses = parallel(delayed(call_train_local)(dev) for dev in devices)
         avg_loss = np.mean(losses)
