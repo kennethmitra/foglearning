@@ -16,14 +16,13 @@ from copy import deepcopy
 from average import average_weights
 
 class Device:
-    def __init__(self, id, train_ds, test_ds, device, writer, args):
+    def __init__(self, id, train_ds, test_ds, device, args):
         self.id = id
         self.bs = args.batch_size
         self.train_ds = train_ds
         self.test_ds = test_ds
         self.shuffle_ds = args.shuffle_dataset
         self.model = initialize_model(args, device)
-        self.writer = writer  # Tensorboard logging
 
         # Training
         self.train_dl = DataLoader(self.train_ds, batch_size=self.bs, shuffle=self.shuffle_ds, num_workers=0)
