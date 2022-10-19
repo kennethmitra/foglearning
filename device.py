@@ -23,6 +23,7 @@ class Device:
         self.test_ds = test_ds
         self.shuffle_ds = args.shuffle_dataset
         self.model = initialize_model(args, device)
+        self.args = args
 
         # Training
         self.train_dl = DataLoader(self.train_ds, batch_size=self.bs, shuffle=self.shuffle_ds, num_workers=0)
@@ -83,18 +84,18 @@ class Device:
         idxs = np.random.choice(list(range(len(device_list))), self.share_k_devices)
         self.target_share_devs = [device_list[i] for i in idxs]
 
-    def send_target_devices(self, device_list):
+    def send_target_devices(self, device_list, sample_list):
         self._choose_target_devices(device_list)
 
-        for dev in self.target_share_devs:
-            dev._receive_from_nodes(deepcopy(self.model.shared_layers.state_dict()))
+        for dev, sample in zip(self.target_share_devs, sample_list):
+            dev._receive_from_node(deepcopy(self.model.shared_layers.state_dict()), sample)
 
     def _receive_from_node(self, weights, n_samples):
         self.received_weights.append((weights, n_samples))
 
     def aggregate_weights(self):
         # Add current device's weights to list
-        self.received_weights.append((deepcopy(self.model.shared_layers.state_dict())))
+        self.received_weights.append((deepcopy(self.model.shared_layers.state_dict()), self.args.num_local_update))
 
         all_weights = [el[0] for el in self.received_weights]
         all_samples = [el[1] for el in self.received_weights]
