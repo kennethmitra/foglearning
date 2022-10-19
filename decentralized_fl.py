@@ -63,7 +63,7 @@ def call_test_local(dev):
 
 
 print(f"Running on {os.cpu_count()} processes")
-with Parallel(n_jobs=os.cpu_count(),backend="threading") as parallel:
+with Parallel(n_jobs=os.cpu_count(), backend="threading") as parallel:
     for round in range(10):
         losses = parallel(delayed(call_train_local)(dev) for dev in devices)
         avg_loss = np.mean(losses)
@@ -71,9 +71,8 @@ with Parallel(n_jobs=os.cpu_count(),backend="threading") as parallel:
         writer.add_scalar("Loss/avg_loss", avg_loss, round)
         writer.add_scalar("Loss/loss_var", loss_var, round)
 
-
-        # parallel(delayed(call_send_target_devices)(dev) for dev in devices)
-        # parallel(delayed(call_aggregate_weights)(dev) for dev in devices)
+        parallel(delayed(call_send_target_devices)(dev) for dev in devices)
+        parallel(delayed(call_aggregate_weights)(dev) for dev in devices)
 
         # Compute test accuracy
         results = parallel(delayed(call_test_local)(dev) for dev in devices)
