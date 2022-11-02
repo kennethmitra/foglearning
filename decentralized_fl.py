@@ -17,16 +17,20 @@ from torchvision import transforms
 from options import args_parser
 from device import Device
 
-# Logging
-writer = SummaryWriter()
-
 # Parse args
 args = args_parser()
+
+# Logging
+writer = SummaryWriter(comment=args.run_name)
+
+# Print args
 print("========== ARGS ===========")
+argstring = []
 for k, v in vars(args).items():
     print(f"{k}: {v}")
+    argstring.append(f"{k}: {v}")
 print("===========================")
-# writer.add_hparams(vars(args), name='Args')
+writer.add_text("hparams/dump", " \n ".join(argstring))
 
 # Set seed from provided args
 torch.manual_seed(args.seed)
@@ -64,7 +68,7 @@ def call_test_local(dev):
 
 print(f"Running on {os.cpu_count()} processes")
 with Parallel(n_jobs=os.cpu_count(), backend="threading") as parallel:
-    for round in range(10):
+    for round in range(args.num_total_rounds):
         losses = parallel(delayed(call_train_local)(dev) for dev in devices)
         avg_loss = np.mean(losses)
         loss_var = np.var(losses)

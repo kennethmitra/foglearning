@@ -14,6 +14,7 @@ from models.initialize_model import initialize_model
 import torch
 from copy import deepcopy
 from average import average_weights
+from torchsummary import summary
 
 class Device:
     def __init__(self, id, train_ds, test_ds, device, args):
@@ -23,6 +24,9 @@ class Device:
         self.test_ds = test_ds
         self.shuffle_ds = args.shuffle_dataset
         self.model = initialize_model(args, device)
+        print(f"Device {self.id} model summary: ")
+        summary(self.model.shared_layers, (1, 28, 28), device='cpu')
+
         self.args = args
 
         # Training
@@ -81,13 +85,14 @@ class Device:
         return correct, total
 
     def _choose_target_devices(self, device_list):
-        idxs = np.random.choice(list(range(len(device_list))), self.share_k_devices)
+        idxs = np.random.choice(list(range(len(device_list))), self.share_k_devices, replace=False)
         self.target_share_devs = [device_list[i] for i in idxs]
 
     def send_target_devices(self, device_list, sample_list):
-        self._choose_target_devices(device_list)
+        self._choose_target_devices([d for d in device_list if d.id != self.id])
 
         for dev, sample in zip(self.target_share_devs, sample_list):
+            print(f"device {self.id} sending to {dev.id}")
             dev._receive_from_node(deepcopy(self.model.shared_layers.state_dict()), sample)
 
     def _receive_from_node(self, weights, n_samples):
