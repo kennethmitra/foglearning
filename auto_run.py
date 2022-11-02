@@ -32,7 +32,9 @@ for val in tqdm(values):
     if val in completed:
         continue
 
-    subprocess.call(f"python decentralized_fl.py --num_devices {NUM_DEVICES} --num_share_devices {val} --run_name share_{val}_of_{NUM_DEVICES}")
+    print(os.path.realpath(__file__))
+    # subprocess.call(f".\\venv\\Scripts\\activate.bat && python decentralized_fl.py --num_devices {NUM_DEVICES} --num_share_devices {val} --run_name share_{val}_of_{NUM_DEVICES}", cwd=os.getcwd())
+    subprocess.call(f"venv\\Scripts\\python.exe decentralized_fl.py --num_devices {NUM_DEVICES} --num_share_devices {val} --run_name share_{val}_of_{NUM_DEVICES}", cwd=os.getcwd())
 
     # Save progress
     completed.append(val)
