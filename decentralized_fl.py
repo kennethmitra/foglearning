@@ -26,11 +26,14 @@ writer = SummaryWriter(comment=args.run_name)
 # Print args
 print("========== ARGS ===========")
 argstring = []
+argtable = ["| Param | Value |  \n| --- | --- |"]
 for k, v in vars(args).items():
     print(f"{k}: {v}")
     argstring.append(f"{k}: {v}")
+    argtable.append(f"| {k} | {v} |")
 print("===========================")
 writer.add_text("hparams/dump", " \n ".join(argstring))
+writer.add_text("hparams/table", "  \n".join(argtable))
 
 # Set seed from provided args
 torch.manual_seed(args.seed)
@@ -67,7 +70,7 @@ def call_test_local(dev):
 
 
 print(f"Running on {os.cpu_count()} processes")
-with Parallel(n_jobs=os.cpu_count(), backend="threading") as parallel:
+with Parallel(n_jobs=os.cpu_count()//2, backend="threading") as parallel:
     for round in range(args.num_total_rounds):
         losses = parallel(delayed(call_train_local)(dev) for dev in devices)
         avg_loss = np.mean(losses)
