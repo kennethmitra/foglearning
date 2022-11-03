@@ -10,12 +10,13 @@ import os
 
 import numpy as np
 import torch
-from joblib import Parallel, delayed
 import torchvision.datasets as datasets
+from joblib import Parallel, delayed
 from tensorboardX import SummaryWriter
 from torchvision import transforms
-from options import args_parser
+
 from device import Device
+from options import args_parser
 
 # Parse args
 args = args_parser()
@@ -26,14 +27,18 @@ writer = SummaryWriter(comment=args.run_name)
 # Print args
 print("========== ARGS ===========")
 argstring = []
-argtable = ["| Param | Value |  \n| --- | --- |"]
+argtable_head = []
+argtable_mid = []
+argtable_vals = []
 for k, v in vars(args).items():
     print(f"{k}: {v}")
     argstring.append(f"{k}: {v}")
-    argtable.append(f"| {k} | {v} |")
+    argtable_head.append(str(k))
+    argtable_mid.append("---")
+    argtable_vals.append(str(v))
 print("===========================")
 writer.add_text("hparams/dump", " \n ".join(argstring))
-writer.add_text("hparams/table", "  \n".join(argtable))
+writer.add_text("hparams/table", f"| {' | '.join(argtable_head)} |  \n| {' | '.join(argtable_mid)} |  \n| {' | '.join(argtable_vals)} |  ")
 
 # Set seed from provided args
 torch.manual_seed(args.seed)
@@ -50,20 +55,23 @@ test_ds = datasets.MNIST('./data', download=True, train=False, transform=transfo
 
 data_indices = []
 for label in range(10):
-	data_indices.append(np.nonzero(train_ds.targets==label))
+    data_indices.append(np.nonzero(train_ds.targets == label))
+
 
 def get_device_data(class_dist, total_data_count):
-	return_indices = np.array([])
-	for labels in range(10):
-		class_data_count = int(class_dist[labels]*total_data_count)
-		return_indices = np.concatenate(
-			[return_indices, np.random.choice(data_indices[labels].flatten(), class_data_count)])
-	train_subset = torch.utils.data.Subset(train_ds, return_indices)
-	return train_subset.dataset
+    return_indices = np.array([])
+    for labels in range(10):
+        class_data_count = int(class_dist[labels] * total_data_count)
+        return_indices = np.concatenate(
+            [return_indices, np.random.choice(data_indices[labels].flatten(), class_data_count)])
+    train_subset = torch.utils.data.Subset(train_ds, return_indices)
+    return train_subset.dataset
+
 
 # Create/Initialize devices
-devices = [Device(id=devid, train_ds=get_device_data([0.1]*10, 5000), test_ds=test_ds, device=compute_device, args=args) for
-           devid in range(args.num_devices)]
+devices = [
+    Device(id=devid, train_ds=get_device_data([0.1] * 10, 5000), test_ds=test_ds, device=compute_device, args=args) for
+    devid in range(args.num_devices)]
 
 
 def call_train_local(dev):
@@ -83,7 +91,7 @@ def call_test_local(dev):
 
 
 print(f"Running on {os.cpu_count()} processes")
-with Parallel(n_jobs=os.cpu_count()//2, backend="threading") as parallel:
+with Parallel(n_jobs=os.cpu_count() // 2, backend="threading") as parallel:
     for round in range(args.num_total_rounds):
         losses = parallel(delayed(call_train_local)(dev) for dev in devices)
         avg_loss = np.mean(losses)
@@ -98,7 +106,7 @@ with Parallel(n_jobs=os.cpu_count()//2, backend="threading") as parallel:
         results = parallel(delayed(call_test_local)(dev) for dev in devices)
         avg_acc = np.sum([el[0] for el in results]) / np.sum([el[1] for el in results])
         acc_var = np.var([el[0] / el[1] for el in results])
-        print(f"Round: {round}, Avg Loss = {avg_loss}, var = {loss_var} \t | \t Average acc = {avg_acc}, variance = {acc_var}")
+        print(
+            f"Round: {round}, Avg Loss = {avg_loss}, var = {loss_var} \t | \t Average acc = {avg_acc}, variance = {acc_var}")
         writer.add_scalar("Accuracy/avg_acc", avg_acc, round)
         writer.add_scalar("Accuracy/acc_var", acc_var, round)
-

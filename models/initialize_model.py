@@ -1,22 +1,22 @@
 # Interface between models and the clients
 # Include intialization, training for one iteration and test function
 
-from M1.models.cifar_cnn_3conv_layer import cifar_cnn_3conv, cifar_cnn_3conv_specific, cifar_cnn_3conv_shared
-from M1.models.cifar_resnet import ResNet18
-from M1.models.mnist_cnn import mnist_lenet
-from M1.models.mnist_logistic import LogisticRegression
-import torch.optim as optim
-import torch.nn as nn
+from os.path import dirname, abspath, join
 
-# following import is used for tesing the function of this part, they can be deleted if you delete the main() funciton
-from M1.options import args_parser
 import torch
+import torch.nn as nn
+import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
-from os.path import dirname, abspath, join
 from torch.autograd import Variable
 from tqdm import tqdm
 
+from M1.models.cifar_cnn_3conv_layer import cifar_cnn_3conv
+from M1.models.cifar_resnet import ResNet18
+from M1.models.mnist_cnn import mnist_lenet
+from M1.models.mnist_logistic import LogisticRegression
+# following import is used for tesing the function of this part, they can be deleted if you delete the main() funciton
+from M1.options import args_parser
 
 
 class MTL_Model(object):

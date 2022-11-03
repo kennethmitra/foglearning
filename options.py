@@ -63,7 +63,7 @@ def args_parser():
     parser.add_argument(
         '--num_share_devices',
         type=int,
-        default=5   ,
+        default=5,
         help='Number of devices to share with at each share round'
     )
     parser.add_argument(
@@ -108,13 +108,6 @@ def args_parser():
         default=0,
         help='verbose for print progress bar'
     )
-    # setting for federeated learning
-    parser.add_argument(
-        '--frac',
-        type=float,
-        default=1,
-        help='fraction of participated clients'
-    )
     parser.add_argument(
         '--num_devices',
         type=int,
@@ -127,12 +120,6 @@ def args_parser():
         type=int,
         default=1,
         help='random seed (defaul: 1)'
-    )
-    parser.add_argument(
-        '--dataset_root',
-        type=str,
-        default='data',
-        help='dataset root folder'
     )
     parser.add_argument(
         '--use_gpu',
