@@ -48,8 +48,21 @@ transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1
 train_ds = datasets.MNIST('./data', download=True, train=True, transform=transform)
 test_ds = datasets.MNIST('./data', download=True, train=False, transform=transform)
 
+data_indices = []
+for label in range(10):
+	data_indices.append(np.nonzero(train_ds.targets==label))
+
+def get_device_data(class_dist, total_data_count):
+	return_indices = np.array([])
+	for labels in range(10):
+		class_data_count = int(class_dist[labels]*total_data_count)
+		return_indices = np.concatenate(
+			[return_indices, np.random.choice(data_indices[labels].flatten(), class_data_count)])
+	train_subset = torch.utils.data.Subset(train_ds, return_indices)
+	return train_subset.dataset
+
 # Create/Initialize devices
-devices = [Device(id=devid, train_ds=train_ds, test_ds=test_ds, device=compute_device, args=args) for
+devices = [Device(id=devid, train_ds=get_device_data([0.1]*10, 5000), test_ds=test_ds, device=compute_device, args=args) for
            devid in range(args.num_devices)]
 
 
