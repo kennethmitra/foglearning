@@ -68,7 +68,7 @@ test_ds = datasets.CIFAR10('./data', download=True, train=False, transform=trans
 
 data_indices = []
 for label in range(10):
-	data_indices.append(np.nonzero(np.array(train_ds.targets)==label)[0])
+    data_indices.append(np.nonzero(np.array(train_ds.targets)==label)[0])
 
 
 def get_device_data(class_dist, total_data_count):

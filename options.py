@@ -14,13 +14,13 @@ def args_parser():
     parser.add_argument(
         '--dataset',
         type=str,
-        default='mnist',
+        default='cifar10',
         help='name of the dataset: mnist, cifar10'
     )
     parser.add_argument(
         '--model',
         type=str,
-        default='logistic',  #'lenet',
+        default='cnn_complex',  #'lenet',
         help='name of model. mnist: logistic, lenet; cifar10: cnn_tutorial, cnn_complex'
     )
     parser.add_argument(
@@ -63,7 +63,7 @@ def args_parser():
     parser.add_argument(
         '--num_share_devices',
         type=int,
-        default=5,
+        default=1,
         help='Number of devices to share with at each share round'
     )
     parser.add_argument(
@@ -111,7 +111,7 @@ def args_parser():
     parser.add_argument(
         '--num_devices',
         type=int,
-        default=30,
+        default=20,
         help='number of all available devices'
     )
 
