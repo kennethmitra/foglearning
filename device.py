@@ -94,9 +94,15 @@ class Device:
         for dev, sample in zip(self.target_share_devs, sample_list):
             print(f"device {self.id} sending to {dev.id}")
             dev._receive_from_node(deepcopy(self.model.shared_layers.state_dict()), sample)
+    
+    def send_to_cloud(self):
+        return deepcopy((self.model.shared_layers.state_dict(), self.args.num_local_update))
 
     def _receive_from_node(self, weights, n_samples):
         self.received_weights.append((weights, n_samples))
+        
+    def receive_from_cloud(self, new_weights):
+        self.model.update_model(new_weights)
 
     def aggregate_weights(self):
         # Add current device's weights to list

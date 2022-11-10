@@ -17,6 +17,7 @@ from torchvision import transforms
 
 from device import Device
 from options import args_parser
+import average
 
 # Parse args
 args = args_parser()
@@ -112,9 +113,22 @@ with Parallel(n_jobs=os.cpu_count() // 2, backend="threading") as parallel:
         writer.add_scalar("Loss/avg_loss", avg_loss, round)
         writer.add_scalar("Loss/loss_var", loss_var, round)
 
-        parallel(delayed(call_send_target_devices)(dev) for dev in devices)
-        parallel(delayed(call_aggregate_weights)(dev) for dev in devices)
-
+        if args.fed_avg:
+            # Federated averaging
+            weights = []
+            for dev in devices:
+                weights.append(dev.send_to_cloud())
+                
+            all_weights = [el[0] for el in weights]
+            all_samples = [el[1] for el in weights]
+    
+            new_weights = average.average_weights(all_weights, all_samples)
+            for dev in devices:
+                dev.receive_from_cloud(new_weights)
+        else:
+            parallel(delayed(call_send_target_devices)(dev) for dev in devices)
+            parallel(delayed(call_aggregate_weights)(dev) for dev in devices)
+            
         # Compute test accuracy
         results = parallel(delayed(call_test_local)(dev) for dev in devices)
         avg_acc = np.sum([el[0] for el in results]) / np.sum([el[1] for el in results])

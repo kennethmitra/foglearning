@@ -51,7 +51,7 @@ def args_parser():
     parser.add_argument(
         '--num_local_update',
         type=int,
-        default=128,
+        default=16,
         help='number of local gradient update steps (tau_1)'
     )
     parser.add_argument(
@@ -63,13 +63,19 @@ def args_parser():
     parser.add_argument(
         '--num_share_devices',
         type=int,
-        default=1,
+        default=0,
         help='Number of devices to share with at each share round'
+    )
+    parser.add_argument(
+        '--fed_avg',
+        type=bool,
+        default=False,
+        help='Perform federate averaging. If true, no decentralized training will be don'
     )
     parser.add_argument(
         '--num_total_rounds',
         type=int,
-        default=50,
+        default=200,
         help='Number of total (train + share) rounds to perform'
     )
     parser.add_argument(
