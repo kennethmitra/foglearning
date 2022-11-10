@@ -24,8 +24,8 @@ class Device:
         self.test_ds = test_ds
         self.shuffle_ds = args.shuffle_dataset
         self.model = initialize_model(args, device)
-        print(f"Device {self.id} model summary: ")
-        summary(self.model.shared_layers, (1, 28, 28), device='cpu')
+        #print(f"Device {self.id} model summary: ")
+        #summary(self.model.shared_layers, (3, 32, 32), device='cuda' if args.use_gpu else "cpu")
 
         self.args = args
 

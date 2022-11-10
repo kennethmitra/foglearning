@@ -41,13 +41,26 @@ compute_device = torch.device('cuda' if args.use_gpu else "cpu")
 print("Compute device:", compute_device)
 
 # Create Dataset
-transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
-train_ds = datasets.MNIST('./data', download=True, train=True, transform=transform)
-test_ds = datasets.MNIST('./data', download=True, train=False, transform=transform)
+# transform = transforms.Compose([
+# 	transforms.ToTensor(),
+# 	transforms.Normalize((0.1307,), (0.3081,)),
+# ])
+transform_train = transforms.Compose([
+	transforms.RandomCrop(32, padding=4),
+	transforms.RandomHorizontalFlip(),
+	transforms.ToTensor(),
+	transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+])
+transform_test = transforms.Compose([
+	transforms.ToTensor(),
+	transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+])
+train_ds = datasets.CIFAR10('./data', download=True, train=True, transform=transform_train)
+test_ds = datasets.CIFAR10('./data', download=True, train=False, transform=transform_test)
 
 data_indices = []
 for label in range(10):
-	data_indices.append(np.nonzero(train_ds.targets==label))
+	data_indices.append(np.nonzero(np.array(train_ds.targets)==label)[0])
 
 def get_device_data(class_dist, total_data_count):
 	return_indices = np.array([])
