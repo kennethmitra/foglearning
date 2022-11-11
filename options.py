@@ -7,7 +7,7 @@ def args_parser():
     parser.add_argument(
         '--run_name',
         type=str,
-        default='RUN_NAME_BLANK',
+        default='decentralized_lr0.10_oldavg_0.95decay',
         help='string for the name of the run'
     )
     # dataset and model
@@ -51,7 +51,7 @@ def args_parser():
     parser.add_argument(
         '--num_local_update',
         type=int,
-        default=16,
+        default=32,
         help='number of local gradient update steps (tau_1)'
     )
     parser.add_argument(
@@ -63,7 +63,7 @@ def args_parser():
     parser.add_argument(
         '--num_share_devices',
         type=int,
-        default=0,
+        default=1,
         help='Number of devices to share with at each share round'
     )
     parser.add_argument(
@@ -75,19 +75,19 @@ def args_parser():
     parser.add_argument(
         '--num_total_rounds',
         type=int,
-        default=200,
+        default=100,
         help='Number of total (train + share) rounds to perform'
     )
     parser.add_argument(
         '--lr',
         type=float,
-        default=0.001,
+        default=0.1,
         help='learning rate of the SGD when trained on client'
     )
     parser.add_argument(
         '--lr_decay',
         type=float,
-        default='1',
+        default=0.95, #'1'
         help='lr decay rate'
     )
     parser.add_argument(
@@ -117,7 +117,7 @@ def args_parser():
     parser.add_argument(
         '--num_devices',
         type=int,
-        default=20,
+        default=10,
         help='number of all available devices'
     )
 

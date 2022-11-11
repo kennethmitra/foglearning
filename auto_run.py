@@ -17,8 +17,8 @@ Path(PROGRESS_DIR).mkdir(exist_ok=True, parents=True)
 PROGRESS_FILE = f"{PROGRESS_DIR}/share_devices_exp.json"
 
 # Sweep through num_share_devices
-NUM_DEVICES = 30
-values = list(dict.fromkeys(([0] + np.unique(np.geomspace(1, NUM_DEVICES, num=15, dtype=int)).tolist())))
+NUM_DEVICES = 20
+values = list(dict.fromkeys(([0] + np.unique(np.geomspace(1, NUM_DEVICES, num=10, dtype=int)).tolist())))
 print(values)
 
 if os.path.isfile(PROGRESS_FILE):
@@ -34,7 +34,7 @@ for val in tqdm(values):
 
     print(os.path.realpath(__file__))
     # subprocess.call(f".\\venv\\Scripts\\activate.bat && python decentralized_fl.py --num_devices {NUM_DEVICES} --num_share_devices {val} --run_name share_{val}_of_{NUM_DEVICES}", cwd=os.getcwd())
-    subprocess.call(f"venv\\Scripts\\python.exe decentralized_fl.py --num_devices {NUM_DEVICES} --num_share_devices {val} --run_name share_{val}_of_{NUM_DEVICES}", cwd=os.getcwd())
+    subprocess.call(f"venv\\Scripts\\python.exe decentralized_fl.py --num_devices {NUM_DEVICES} --num_share_devices {val} --run_name V2_share_{val}_of_{NUM_DEVICES}", cwd=os.getcwd())
 
     # Save progress
     completed.append(val)
