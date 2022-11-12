@@ -19,6 +19,8 @@ from device import Device
 from options import args_parser
 import average
 
+print(f"PyTorch version: {torch.__version__}")
+
 # Parse args
 args = args_parser()
 

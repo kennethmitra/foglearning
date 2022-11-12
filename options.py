@@ -75,7 +75,7 @@ def args_parser():
     parser.add_argument(
         '--num_total_rounds',
         type=int,
-        default=100,
+        default=150,
         help='Number of total (train + share) rounds to perform'
     )
     parser.add_argument(
@@ -87,7 +87,7 @@ def args_parser():
     parser.add_argument(
         '--lr_decay',
         type=float,
-        default=0.95, #'1'
+        default=1, #'1'
         help='lr decay rate'
     )
     parser.add_argument(
@@ -130,7 +130,7 @@ def args_parser():
     parser.add_argument(
         '--use_gpu',
         type=bool,
-        default=False,
+        default=True,
         help='Use gpu or not'
     )
     parser.add_argument(
