@@ -14,13 +14,13 @@ def args_parser():
     parser.add_argument(
         '--dataset',
         type=str,
-        default='cifar10',
+        default='mnist',
         help='name of the dataset: mnist, cifar10'
     )
     parser.add_argument(
         '--model',
         type=str,
-        default='cnn_complex',  #'lenet',
+        default='logistic',  #'lenet',
         help='name of model. mnist: logistic, lenet; cifar10: cnn_tutorial, cnn_complex'
     )
     parser.add_argument(
@@ -51,7 +51,7 @@ def args_parser():
     parser.add_argument(
         '--num_local_update',
         type=int,
-        default=32,
+        default=128,
         help='number of local gradient update steps (tau_1)'
     )
     parser.add_argument(
@@ -75,13 +75,13 @@ def args_parser():
     parser.add_argument(
         '--num_total_rounds',
         type=int,
-        default=150,
+        default=50,
         help='Number of total (train + share) rounds to perform'
     )
     parser.add_argument(
         '--lr',
         type=float,
-        default=0.1,
+        default=0.001,
         help='learning rate of the SGD when trained on client'
     )
     parser.add_argument(
@@ -117,7 +117,7 @@ def args_parser():
     parser.add_argument(
         '--num_devices',
         type=int,
-        default=10,
+        default=30,
         help='number of all available devices'
     )
 
@@ -130,7 +130,7 @@ def args_parser():
     parser.add_argument(
         '--use_gpu',
         type=bool,
-        default=True,
+        default=False,
         help='Use gpu or not'
     )
     parser.add_argument(

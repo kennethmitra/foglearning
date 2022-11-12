@@ -15,10 +15,19 @@ print(f"Using {sys.executable}")
 PROGRESS_DIR = "./progress"
 Path(PROGRESS_DIR).mkdir(exist_ok=True, parents=True)
 PROGRESS_FILE = f"{PROGRESS_DIR}/share_devices_exp.json"
+OVERRIDE_PROGRESS_SAVE = True
 
-# Sweep through num_share_devices
-values = [0, 1, 2, 5, 9]
-print(values)
+run_params = []
+for s in [2, 3]:
+    for val in [0, 1, 2, 5, 14]:
+        run_params.append(f"--num_share_devices {val} --run_name share_{val}_of_30 --seed {s}")
+
+run_params.append(f"--num_share_devices 29 --run_name share_29_of_30 --seed 1")
+run_params.append(f"--num_share_devices 29 --run_name share_29_of_30 --seed 2")
+run_params.append(f"--num_share_devices 29 --run_name share_29_of_30 --seed 3")
+
+for param in run_params:
+    print(param)
 
 if os.path.isfile(PROGRESS_FILE):
     print("Resuming from previous run...")
@@ -27,15 +36,14 @@ if os.path.isfile(PROGRESS_FILE):
 else:
     completed = []
 
-for val in tqdm(values):
-    if val in completed:
+for param in tqdm(run_params):
+    if not OVERRIDE_PROGRESS_SAVE and param in completed:
         continue
 
     print(os.path.realpath(__file__))
-    # subprocess.call(f".\\venv\\Scripts\\activate.bat && python decentralized_fl.py --num_devices {NUM_DEVICES} --num_share_devices {val} --run_name share_{val}_of_{NUM_DEVICES}", cwd=os.getcwd())
-    subprocess.call(f"venv\\Scripts\\python.exe decentralized_fl.py --num_share_devices {val} --run_name cifar_numshare_{val}", cwd=os.getcwd())
+    subprocess.call(f"venv\\Scripts\\python.exe decentralized_fl.py {param}", cwd=os.getcwd())
 
     # Save progress
-    completed.append(val)
+    completed.append(param)
     with open(PROGRESS_FILE, 'w', encoding='utf-8') as f:
         json.dump(completed, ensure_ascii=False, indent=4, fp=f)
