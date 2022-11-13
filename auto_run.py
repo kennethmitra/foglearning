@@ -15,7 +15,7 @@ print(f"Using {sys.executable}")
 PROGRESS_DIR = "./progress"
 Path(PROGRESS_DIR).mkdir(exist_ok=True, parents=True)
 PROGRESS_FILE = f"{PROGRESS_DIR}/share_devices_exp.json"
-OVERRIDE_PROGRESS_SAVE = True
+OVERRIDE_PROGRESS_SAVE = False
 
 run_params = []
 for s in [2, 3]:
@@ -38,6 +38,7 @@ else:
 
 for param in tqdm(run_params):
     if not OVERRIDE_PROGRESS_SAVE and param in completed:
+        print(f"Skipping {param}")
         continue
 
     print(os.path.realpath(__file__))

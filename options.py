@@ -130,7 +130,7 @@ def args_parser():
     parser.add_argument(
         '--use_gpu',
         type=bool,
-        default=False,
+        default=True,
         help='Use gpu or not'
     )
     parser.add_argument(
