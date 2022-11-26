@@ -6,6 +6,7 @@ Decentralized learning steps:
 2. Local Training
 3. Weight sharing
 """
+
 import numpy as np
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
@@ -15,9 +16,10 @@ import torch
 from copy import deepcopy
 from average import average_weights
 from torchsummary import summary
+import random
 
 class Device:
-    def __init__(self, id, train_ds, test_ds, device, args):
+    def __init__(self, id, train_ds, test_ds, device, args, x_pos, y_pos, radio_range):
         self.id = id
         self.bs = args.batch_size
         self.train_ds = train_ds
@@ -28,6 +30,11 @@ class Device:
         #summary(self.model.shared_layers, (3, 32, 32), device='cuda' if args.use_gpu else "cpu")
 
         self.args = args
+
+        # Device location
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.radio_range = radio_range
 
         # Training
         self.train_dl = DataLoader(self.train_ds, batch_size=self.bs, shuffle=self.shuffle_ds, num_workers=0)
@@ -82,18 +89,24 @@ class Device:
                 _, predict = torch.max(outputs, 1)
                 total += labels.size(0)
                 correct += (predict == labels).sum().item()
-        return correct, total
+        return correct, total, self.id
 
     def _choose_target_devices(self, device_list):
-        idxs = np.random.choice(list(range(len(device_list))), self.share_k_devices, replace=False)
-        self.target_share_devs = [device_list[i] for i in idxs]
+        if self.args.model_share_strategy == 'random':
+            idxs = np.random.choice(list(range(len(device_list))), self.share_k_devices, replace=False)
+            self.target_share_devs = [device_list[i] for i in idxs]
+        elif self.args.model_share_strategy == 'distance':
+            raise NotImplemented("model share strategy distance not implemented")
 
     def send_target_devices(self, device_list, sample_list):
         self._choose_target_devices([d for d in device_list if d.id != self.id])
 
         for dev, sample in zip(self.target_share_devs, sample_list):
-            print(f"device {self.id} sending to {dev.id}")
-            dev._receive_from_node(deepcopy(self.model.shared_layers.state_dict()), sample)
+            if random.random() < self.args.comm_reliability:
+                print(f"device {self.id} sending to {dev.id}")
+                dev._receive_from_node(deepcopy(self.model.shared_layers.state_dict()), sample)
+            else:
+                print(f"comm failed from device {self.id} to {dev.id}")
     
     def send_to_cloud(self):
         return deepcopy((self.model.shared_layers.state_dict(), self.args.num_local_update))

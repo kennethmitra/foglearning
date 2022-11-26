@@ -41,7 +41,8 @@ for k, v in vars(args).items():
     argtable_vals.append(str(v))
 print("===========================")
 writer.add_text("hparams/dump", " \n ".join(argstring))
-writer.add_text("hparams/table", f"| {' | '.join(argtable_head)} |  \n| {' | '.join(argtable_mid)} |  \n| {' | '.join(argtable_vals)} |  ")
+writer.add_text("hparams/table",
+                f"| {' | '.join(argtable_head)} |  \n| {' | '.join(argtable_mid)} |  \n| {' | '.join(argtable_vals)} |  ")
 
 # Set seed from provided args
 torch.manual_seed(args.seed)
@@ -52,28 +53,28 @@ compute_device = torch.device('cuda' if args.use_gpu else "cpu")
 print("Compute device:", compute_device)
 
 # Create Dataset
-# MNIST
-transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
-train_ds = datasets.MNIST('./data', download=True, train=True, transform=transform)
-test_ds = datasets.MNIST('./data', download=True, train=False, transform=transform)
+# # MNIST
+# transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+# train_ds = datasets.MNIST('./data', download=True, train=True, transform=transform)
+# test_ds = datasets.MNIST('./data', download=True, train=False, transform=transform)
 
-# # CIFAR10
-# transform_train = transforms.Compose([
-# 	transforms.RandomCrop(32, padding=4),
-# 	transforms.RandomHorizontalFlip(),
-# 	transforms.ToTensor(),
-# 	transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-# ])
-# transform_test = transforms.Compose([
-# 	transforms.ToTensor(),
-# 	transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-# ])
-# train_ds = datasets.CIFAR10('./data', download=True, train=True, transform=transform_train)
-# test_ds = datasets.CIFAR10('./data', download=True, train=False, transform=transform_test)
+# CIFAR10
+transform_train = transforms.Compose([
+    transforms.RandomCrop(32, padding=4),
+    transforms.RandomHorizontalFlip(),
+    transforms.ToTensor(),
+    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+])
+transform_test = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+])
+train_ds = datasets.CIFAR10('./data', download=True, train=True, transform=transform_train)
+test_ds = datasets.CIFAR10('./data', download=True, train=False, transform=transform_test)
 
 data_indices = []
 for label in range(10):
-    data_indices.append(np.nonzero(np.array(train_ds.targets)==label)[0])
+    data_indices.append(np.nonzero(np.array(train_ds.targets) == label)[0])
 
 
 def get_device_data(class_dist, total_data_count):
@@ -87,8 +88,12 @@ def get_device_data(class_dist, total_data_count):
 
 
 # Create/Initialize devices
+
+# ring_network = [(0, 0), ()]
+# mesh_network = []
+
 devices = [
-    Device(id=devid, train_ds=get_device_data([0.1] * 10, 5000), test_ds=test_ds, device=compute_device, args=args) for
+    Device(id=devid, train_ds=get_device_data([0.1] * 10, 5000), test_ds=test_ds, device=compute_device, args=args, x_pos=0, y_pos=0, radio_range=10) for
     devid in range(args.num_devices)]
 
 
@@ -122,17 +127,17 @@ with Parallel(n_jobs=os.cpu_count() - 2, backend="threading") as parallel:
             weights = []
             for dev in devices:
                 weights.append(dev.send_to_cloud())
-                
+
             all_weights = [el[0] for el in weights]
             all_samples = [el[1] for el in weights]
-    
+
             new_weights = average.average_weights(all_weights, all_samples)
             for dev in devices:
                 dev.receive_from_cloud(new_weights)
         else:
             parallel(delayed(call_send_target_devices)(dev) for dev in devices)
             parallel(delayed(call_aggregate_weights)(dev) for dev in devices)
-            
+
         # Compute test accuracy
         results = parallel(delayed(call_test_local)(dev) for dev in devices)
         avg_acc = np.sum([el[0] for el in results]) / np.sum([el[1] for el in results])
@@ -141,3 +146,7 @@ with Parallel(n_jobs=os.cpu_count() - 2, backend="threading") as parallel:
             f"Round: {round}, Avg Loss = {avg_loss}, var = {loss_var} \t | \t Average acc = {avg_acc}, variance = {acc_var}")
         writer.add_scalar("Accuracy/avg_acc", avg_acc, round)
         writer.add_scalar("Accuracy/acc_var", acc_var, round)
+
+        # Individual Accuracies
+        for i in range(len(results)):
+            writer.add_scalar(f"Individual_Accuracy/device_{results[i][2]}", results[i][0] / results[i][1], round)

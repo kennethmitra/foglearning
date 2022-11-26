@@ -18,13 +18,14 @@ PROGRESS_FILE = f"{PROGRESS_DIR}/share_devices_exp.json"
 OVERRIDE_PROGRESS_SAVE = False
 
 run_params = []
-for s in [2, 3]:
-    for val in [0, 1, 2, 5, 14]:
-        run_params.append(f"--num_share_devices {val} --run_name share_{val}_of_30 --seed {s}")
+for s in [1, 2, 3]:
+    for val in [1.0, 0.95, 0.9, 0.8, 0.7]:
+        run_params.append(f"--num_share_devices 2 --comm_reliability {val} --run_name cifar_comm_{int(val*100)}_share_2 --seed {s}")
+        run_params.append(f"--num_share_devices 5 --comm_reliability {val} --run_name cifar_comm_{int(val * 100)}_share_5 --seed {s}")
 
-run_params.append(f"--num_share_devices 29 --run_name share_29_of_30 --seed 1")
-run_params.append(f"--num_share_devices 29 --run_name share_29_of_30 --seed 2")
-run_params.append(f"--num_share_devices 29 --run_name share_29_of_30 --seed 3")
+for s in [1, 2, 3]:
+    for val in [0, 1, 2, 5, 9]:
+        run_params.append(f"--num_share_devices {val} --run_name cifar_numshare_{val} --seed {s}")
 
 for param in run_params:
     print(param)

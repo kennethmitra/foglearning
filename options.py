@@ -7,26 +7,26 @@ def args_parser():
     parser.add_argument(
         '--run_name',
         type=str,
-        default='decentralized_lr0.10_oldavg_0.95decay',
+        default='TEST',
         help='string for the name of the run'
     )
     # dataset and model
     parser.add_argument(
         '--dataset',
         type=str,
-        default='mnist',
+        default='cifar10',
         help='name of the dataset: mnist, cifar10'
     )
     parser.add_argument(
         '--model',
         type=str,
-        default='logistic',  #'lenet',
+        default='cnn_complex',  #'lenet',  # 'logistic',
         help='name of model. mnist: logistic, lenet; cifar10: cnn_tutorial, cnn_complex'
     )
     parser.add_argument(
         '--input_channels',
         type=int,
-        default=1,
+        default=3,  # <---- IMPORTANT!!!
         help='input channels. mnist:1, cifar10 :3'
     )
     parser.add_argument(
@@ -51,7 +51,7 @@ def args_parser():
     parser.add_argument(
         '--num_local_update',
         type=int,
-        default=128,
+        default=32,
         help='number of local gradient update steps (tau_1)'
     )
     parser.add_argument(
@@ -75,13 +75,13 @@ def args_parser():
     parser.add_argument(
         '--num_total_rounds',
         type=int,
-        default=50,
+        default=150,
         help='Number of total (train + share) rounds to perform'
     )
     parser.add_argument(
         '--lr',
         type=float,
-        default=0.001,
+        default=0.1,
         help='learning rate of the SGD when trained on client'
     )
     parser.add_argument(
@@ -117,8 +117,21 @@ def args_parser():
     parser.add_argument(
         '--num_devices',
         type=int,
-        default=30,
+        default=10,
         help='number of all available devices'
+    )
+    parser.add_argument(
+        '--comm_reliability',
+        type=float,
+        default=1.0,
+        help='Fraction of time communication works'
+    )
+    parser.add_argument(
+        '--model_share_strategy',
+        type=str,
+        default='random',
+        help='random or distance',
+        choices=['random', 'distance']
     )
 
     parser.add_argument(
