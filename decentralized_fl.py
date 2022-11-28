@@ -71,6 +71,7 @@ transform_test = transforms.Compose([
 ])
 train_ds = datasets.CIFAR10('./data', download=True, train=True, transform=transform_train)
 test_ds = datasets.CIFAR10('./data', download=True, train=False, transform=transform_test)
+train_size = len(train_ds)
 
 data_indices = []
 for label in range(10):
@@ -86,16 +87,22 @@ def get_device_data(class_dist, total_data_count):
     train_subset = torch.utils.data.Subset(train_ds, return_indices)
     return train_subset.dataset
 
+def get_device_distribution(device_id):
+    if args.iid == True:
+        return [0.1] * 10
+    else:
+        class_dist = 0.05*np.ones((1,10))
+        major_labels = (device_id%10, (device_id%10+1)%10)
+        for i in major_labels:
+            class_dist[i] = 0.3
+        return class_dist
 
 # Create/Initialize devices
 
 # ring_network = [(0, 0), ()]
 # mesh_network = []
 
-devices = [
-    Device(id=devid, train_ds=get_device_data([0.1] * 10, 5000), test_ds=test_ds, device=compute_device, args=args, x_pos=float(devid), y_pos=0, radio_range=4.5) for
-    devid in range(args.num_devices)]
-
+devices = [Device(id=devid, train_ds=get_device_data(get_device_distribution(devid), train_size//args.num_devices), test_ds=test_ds, device=compute_device, args=args, x_pos=float(devid), y_pos=0, radio_range=4.5) for devid in range(args.num_devices)]
 
 def call_train_local(dev):
     return dev.train_local(num_iter=args.num_local_update, device=compute_device)

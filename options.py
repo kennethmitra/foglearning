@@ -7,7 +7,7 @@ def args_parser():
     parser.add_argument(
         '--run_name',
         type=str,
-        default='TEST',
+        default='Noniid_1_sharer',
         help='string for the name of the run'
     )
     # dataset and model
@@ -37,6 +37,12 @@ def args_parser():
     )
     parser.add_argument(
         '--shuffle_dataset',
+        type=bool,
+        default=True,
+        help="shuffle the order of the dataset for each client"
+    )
+    parser.add_argument(
+        '--iid',
         type=bool,
         default=True,
         help="shuffle the order of the dataset for each client"
