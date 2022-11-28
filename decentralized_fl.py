@@ -93,7 +93,7 @@ def get_device_data(class_dist, total_data_count):
 # mesh_network = []
 
 devices = [
-    Device(id=devid, train_ds=get_device_data([0.1] * 10, 5000), test_ds=test_ds, device=compute_device, args=args, x_pos=0, y_pos=0, radio_range=10) for
+    Device(id=devid, train_ds=get_device_data([0.1] * 10, 5000), test_ds=test_ds, device=compute_device, args=args, x_pos=float(devid), y_pos=0, radio_range=4.5) for
     devid in range(args.num_devices)]
 
 
@@ -150,3 +150,7 @@ with Parallel(n_jobs=os.cpu_count() - 2, backend="threading") as parallel:
         # Individual Accuracies
         for i in range(len(results)):
             writer.add_scalar(f"Individual_Accuracy/device_{results[i][2]}", results[i][0] / results[i][1], round)
+
+    for device in devices:
+        writer.add_text("stats/tx_dist_avg", str(np.mean(device.transmission_dist_hist)), round)
+        writer.add_text("stats/tx_dist_var", str(np.var(device.transmission_dist_hist)), round)

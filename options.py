@@ -63,7 +63,7 @@ def args_parser():
     parser.add_argument(
         '--num_share_devices',
         type=int,
-        default=1,
+        default=5,
         help='Number of devices to share with at each share round'
     )
     parser.add_argument(
@@ -129,7 +129,7 @@ def args_parser():
     parser.add_argument(
         '--model_share_strategy',
         type=str,
-        default='random',
+        default='distance',
         help='random or distance',
         choices=['random', 'distance']
     )

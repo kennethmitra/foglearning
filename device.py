@@ -6,6 +6,7 @@ Decentralized learning steps:
 2. Local Training
 3. Weight sharing
 """
+import math
 
 import numpy as np
 from torch.autograd import Variable
@@ -35,6 +36,7 @@ class Device:
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.radio_range = radio_range
+        self.transmission_dist_hist = []
 
         # Training
         self.train_dl = DataLoader(self.train_ds, batch_size=self.bs, shuffle=self.shuffle_ds, num_workers=0)
@@ -91,12 +93,20 @@ class Device:
                 correct += (predict == labels).sum().item()
         return correct, total, self.id
 
+    def _is_within_range(self, other):
+        return math.sqrt((self.x_pos - other.x_pos)**2 + (self.y_pos - other.y_pos)**2) <= self.radio_range
+
+    def record_transmission(self, other):
+        self.transmission_dist_hist.append(math.sqrt((self.x_pos - other.x_pos)**2 + (self.y_pos - other.y_pos)**2))
+
     def _choose_target_devices(self, device_list):
         if self.args.model_share_strategy == 'random':
             idxs = np.random.choice(list(range(len(device_list))), self.share_k_devices, replace=False)
             self.target_share_devs = [device_list[i] for i in idxs]
         elif self.args.model_share_strategy == 'distance':
-            raise NotImplemented("model share strategy distance not implemented")
+            devices_in_range = list(filter(self._is_within_range, device_list))
+            idxs = np.random.choice(list(range(len(devices_in_range))), self.share_k_devices, replace=False)
+            self.target_share_devs = [devices_in_range[i] for i in idxs]
 
     def send_target_devices(self, device_list, sample_list):
         self._choose_target_devices([d for d in device_list if d.id != self.id])
@@ -105,16 +115,21 @@ class Device:
             if random.random() < self.args.comm_reliability:
                 print(f"device {self.id} sending to {dev.id}")
                 dev._receive_from_node(deepcopy(self.model.shared_layers.state_dict()), sample)
+                self.record_transmission(dev)
             else:
                 print(f"comm failed from device {self.id} to {dev.id}")
-    
+
     def send_to_cloud(self):
+        # TODO Add in call to record_transmission_distance()
+        # TODO add transmission failures
         return deepcopy((self.model.shared_layers.state_dict(), self.args.num_local_update))
 
     def _receive_from_node(self, weights, n_samples):
+        # TODO add transmission failures
         self.received_weights.append((weights, n_samples))
-        
+
     def receive_from_cloud(self, new_weights):
+        # TODO add transmission failures
         self.model.update_model(new_weights)
 
     def aggregate_weights(self):
