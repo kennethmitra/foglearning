@@ -105,7 +105,7 @@ class Device:
             self.target_share_devs = [device_list[i] for i in idxs]
         elif self.args.model_share_strategy == 'distance':
             devices_in_range = list(filter(self._is_within_range, device_list))
-            idxs = np.random.choice(list(range(len(devices_in_range))), self.share_k_devices, replace=False)
+            idxs = np.random.choice(list(range(len(devices_in_range))), min(self.share_k_devices, len(devices_in_range)), replace=False)
             self.target_share_devs = [devices_in_range[i] for i in idxs]
 
     def send_target_devices(self, device_list, sample_list):
