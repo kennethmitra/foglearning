@@ -7,7 +7,7 @@ def args_parser():
     parser.add_argument(
         '--run_name',
         type=str,
-        default='Noniid_1_sharer',
+        default='iid_fedavg_comm_reliability_0.5',
         help='string for the name of the run'
     )
     # dataset and model
@@ -44,7 +44,7 @@ def args_parser():
     parser.add_argument(
         '--iid',
         type=bool,
-        default=True,
+        default=False,
         help="shuffle the order of the dataset for each client"
     )
     # nn training hyper parameter
@@ -136,8 +136,8 @@ def args_parser():
         '--model_share_strategy',
         type=str,
         default='distance',
-        help='random or distance',
-        choices=['random', 'distance']
+        help='random or distance or ring',
+        choices=['random', 'distance', 'ring']
     )
 
     parser.add_argument(

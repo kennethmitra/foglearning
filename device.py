@@ -46,6 +46,9 @@ class Device:
         self.received_weights = []
         self.target_share_devs = []
         self.share_k_devices = args.num_share_devices
+        
+        # communication failure
+        self.comm_fail = False
 
         # Testing
         self.test_dl = DataLoader(self.test_ds, batch_size=self.bs, shuffle=False, num_workers=0)  # Using same ds for train/test
@@ -98,6 +101,10 @@ class Device:
 
     def record_transmission(self, other):
         self.transmission_dist_hist.append(math.sqrt((self.x_pos - other.x_pos)**2 + (self.y_pos - other.y_pos)**2))
+        
+    def record_cloud_transmission(self):
+        # Assumes cloud distance is the furthest distance between the devices
+        self.transmission_dist_hist.append(self.args.num_devices)
 
     def _choose_target_devices(self, device_list):
         if self.args.model_share_strategy == 'random':
@@ -107,6 +114,11 @@ class Device:
             devices_in_range = list(filter(self._is_within_range, device_list))
             idxs = np.random.choice(list(range(len(devices_in_range))), min(self.share_k_devices, len(devices_in_range)), replace=False)
             self.target_share_devs = [devices_in_range[i] for i in idxs]
+        elif self.args.model_share_strategy == 'ring':
+            # communicate with neighbors only
+            idxs = [(self.id)%(self.args.num_devices-1), (self.id-1)%(self.args.num_devices-1)]
+            print(idxs)
+            self.target_share_devs = [device_list[i] for i in idxs]
 
     def send_target_devices(self, device_list, sample_list):
         self._choose_target_devices([d for d in device_list if d.id != self.id])
@@ -118,19 +130,26 @@ class Device:
                 self.record_transmission(dev)
             else:
                 print(f"comm failed from device {self.id} to {dev.id}")
+                self.comm_fail = True
 
     def send_to_cloud(self):
-        # TODO Add in call to record_transmission_distance()
-        # TODO add transmission failures
-        return deepcopy((self.model.shared_layers.state_dict(), self.args.num_local_update))
+        if np.random.rand() < self.args.comm_reliability:
+            self.record_cloud_transmission()
+            print(f"device {self.id} sending to cloud")
+            return deepcopy((self.model.shared_layers.state_dict(), self.args.num_local_update))
+        else:
+            print(f"device {self.id} failed to send to cloud")
+            self.comm_fail = True
+            return None
 
     def _receive_from_node(self, weights, n_samples):
-        # TODO add transmission failures
         self.received_weights.append((weights, n_samples))
 
     def receive_from_cloud(self, new_weights):
-        # TODO add transmission failures
-        self.model.update_model(new_weights)
+        if np.random.rand() < self.args.comm_reliability:
+            self.model.update_model(new_weights)
+        else:
+            print(f"device {self.id} failed to receive from cloud")
 
     def aggregate_weights(self):
         # Add current device's weights to list

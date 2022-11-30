@@ -80,21 +80,24 @@ for label in range(10):
 
 def get_device_data(class_dist, total_data_count):
     return_indices = np.array([])
+    label_count = []
     for labels in range(10):
         class_data_count = int(class_dist[labels] * total_data_count)
+        label_count.append(class_data_count)
         return_indices = np.concatenate(
             [return_indices, np.random.choice(data_indices[labels].flatten(), class_data_count)])
     train_subset = torch.utils.data.Subset(train_ds, return_indices)
+    print("data distribution:", label_count)
     return train_subset.dataset
 
 def get_device_distribution(device_id):
-    if args.iid == True:
+    if args.iid:
         return [0.1] * 10
     else:
-        class_dist = 0.05*np.ones((1,10))
+        class_dist = 0.0*np.ones(10)
         major_labels = (device_id%10, (device_id%10+1)%10)
         for i in major_labels:
-            class_dist[i] = 0.3
+            class_dist[i] = 0.5
         return class_dist
 
 # Create/Initialize devices
@@ -135,8 +138,8 @@ with Parallel(n_jobs=os.cpu_count() - 2, backend="threading") as parallel:
             for dev in devices:
                 weights.append(dev.send_to_cloud())
 
-            all_weights = [el[0] for el in weights]
-            all_samples = [el[1] for el in weights]
+            all_weights = [el[0] for el in weights if el is not None]
+            all_samples = [el[1] for el in weights if el is not None]
 
             new_weights = average.average_weights(all_weights, all_samples)
             for dev in devices:
