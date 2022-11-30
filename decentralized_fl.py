@@ -159,5 +159,5 @@ with Parallel(n_jobs=os.cpu_count() - 2, backend="threading") as parallel:
             writer.add_scalar(f"Individual_Accuracy/device_{results[i][2]}", results[i][0] / results[i][1], round)
 
     for device in devices:
-        writer.add_text("stats/tx_dist_avg", str(np.mean(device.transmission_dist_hist)), round)
-        writer.add_text("stats/tx_dist_var", str(np.var(device.transmission_dist_hist)), round)
+        writer.add_text(f"stats/tx_dist_avg_{device.id}", str(np.mean(device.transmission_dist_hist)), round)
+        writer.add_text(f"stats/tx_dist_var_{device.id}", str(np.var(device.transmission_dist_hist)), round)

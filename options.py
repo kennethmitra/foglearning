@@ -135,7 +135,7 @@ def args_parser():
     parser.add_argument(
         '--model_share_strategy',
         type=str,
-        default='distance',
+        default='random',
         help='random or distance',
         choices=['random', 'distance']
     )
