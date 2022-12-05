@@ -1,0 +1,9 @@
+joblib==1.2.0
+matplotlib==3.5.1
+numpy==1.23.3
+pandas==1.4.1
+seaborn==0.12.1
+tensorboardX==2.5.1
+torch==1.13.0+cu117
+torchvision==0.14.0+cu117
+tqdm==4.62.3

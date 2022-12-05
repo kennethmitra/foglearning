@@ -15,9 +15,14 @@ from joblib import Parallel, delayed
 from tensorboardX import SummaryWriter
 from torchvision import transforms
 
+import average
 from device import Device
 from options import args_parser
-import average
+
+
+##############################
+# Initial Setup and Logging
+##############################
 
 print(f"PyTorch version: {torch.__version__}")
 
@@ -52,13 +57,16 @@ if args.use_gpu:
 compute_device = torch.device('cuda' if args.use_gpu else "cpu")
 print("Compute device:", compute_device)
 
-# Create Dataset
-# # MNIST
+##############################
+# Define Dataset
+##############################
+
+# For MNIST
 # transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
 # train_ds = datasets.MNIST('./data', download=True, train=True, transform=transform)
 # test_ds = datasets.MNIST('./data', download=True, train=False, transform=transform)
 
-# CIFAR10
+# For CIFAR10
 transform_train = transforms.Compose([
     transforms.RandomCrop(32, padding=4),
     transforms.RandomHorizontalFlip(),
@@ -77,6 +85,10 @@ data_indices = []
 for label in range(10):
     data_indices.append(np.nonzero(np.array(train_ds.targets) == label)[0])
 
+
+####################################
+# Functions for Dataset processing
+####################################
 
 def get_device_data(class_dist, total_data_count):
     return_indices = np.array([])
@@ -100,12 +112,16 @@ def get_device_distribution(device_id):
             class_dist[i] = 0.5
         return class_dist
 
+##############################
 # Create/Initialize devices
-
-# ring_network = [(0, 0), ()]
-# mesh_network = []
+##############################
 
 devices = [Device(id=devid, train_ds=get_device_data(get_device_distribution(devid), train_size//args.num_devices), test_ds=test_ds, device=compute_device, args=args, x_pos=float(devid), y_pos=0, radio_range=4.5) for devid in range(args.num_devices)]
+
+
+#######################################
+# Define parallelization functions
+#######################################
 
 def call_train_local(dev):
     return dev.train_local(num_iter=args.num_local_update, device=compute_device)
@@ -122,6 +138,10 @@ def call_aggregate_weights(dev):
 def call_test_local(dev):
     return dev.test_local(device=compute_device)
 
+
+##############################
+# Run experiment
+##############################
 
 print(f"Running on {os.cpu_count()} processes")
 with Parallel(n_jobs=os.cpu_count() - 2, backend="threading") as parallel:

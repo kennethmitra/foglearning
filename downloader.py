@@ -1,13 +1,12 @@
-import glob
 import os
-from urllib.request import urlopen
-from urllib.request import urlretrieve
-import urllib
-import cgi
 import re
 from pathlib import Path
+from urllib.request import urlretrieve
 from tqdm import tqdm
 
+"""
+Used to download a large number of csv's from Tensorboard quickly
+"""
 
 SAVE_PATH = "results/cifar_strat_compare"
 Path(SAVE_PATH).mkdir(exist_ok=True, parents=True)

@@ -1,6 +1,8 @@
 import argparse
-import torch
 
+"""
+Defines options for decentralized_fl.py
+"""
 
 def args_parser():
     parser = argparse.ArgumentParser()

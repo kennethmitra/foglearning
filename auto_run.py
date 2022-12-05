@@ -1,15 +1,19 @@
 """
 Run experiments automatically
 """
+import json
 import os.path
 import subprocess
 import sys
-import numpy as np
 from pathlib import Path
-import json
+
 from tqdm import tqdm
 
 print(f"Using {sys.executable}")
+
+################
+# Parameters
+################
 
 # Store/resume completed tasks if interrupted
 PROGRESS_DIR = "./progress"
@@ -17,6 +21,10 @@ Path(PROGRESS_DIR).mkdir(exist_ok=True, parents=True)
 PROGRESS_FILE = f"{PROGRESS_DIR}/share_devices_exp.json"
 OVERRIDE_PROGRESS_SAVE = False
 
+
+########################
+# Queue trials to test
+########################
 run_params = []
 for s in [1, 2, 3, 4]:
     for val in [1.0, 0.9, 0.8, 0.7, 0.5]:
@@ -37,6 +45,12 @@ if os.path.isfile(PROGRESS_FILE):
         completed = json.load(f)
 else:
     completed = []
+
+
+########################
+# Run queued trials
+########################
+
 
 for param in tqdm(run_params):
     if not OVERRIDE_PROGRESS_SAVE and param in completed:

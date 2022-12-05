@@ -1,4 +1,7 @@
 # Hierarchical_FL
+
+## Taken from https://github.com/LuminLiu/HierFL
+
 Implementation of HierFAVG algorithm in [Client-Edge-Cloud Hierarchical Federated Learning](https://arxiv.org/abs/1905.06641) with Pytorch.
 
 For running HierFAVG with mnist and lenet:

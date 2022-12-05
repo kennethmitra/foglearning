@@ -1,8 +1,12 @@
 # Ad-hoc Federated Learning on Edge Devices
 
 ## Quick Start
+### Install dependencies
+Install dependencies with `pip install -r requirements.txt` in order to run our code.
+
+### Running Experiments
 To run experiments on decentralized vs centralized FL, run `decentralized_fl.py` with the command line arguments as specified in options.py
-### Example Command
+#### Example Command
 ```
 python decentralized_fl.py --num_share_devices 5 --comm_reliability 0.8 --model_share_strategy distance --run_name cifar_strat_dist_share_5 --seed 1
 ```
@@ -19,7 +23,10 @@ python decentralized_fl.py --num_share_devices 5 --comm_reliability 0.8 --model_
 ├── auto_run.py                  # Script that automatically runs trials continuously and saves progress in case of interruption
 ├── graphing.py                  # Code used to generate figures from the results directory
 ├── average.py                   # Contains function to average sets of model weights together
-└── downloader.py                # Small script to speed up downloading trial data as csv's from Tensorboard
+├── requirements.txt             # List of dependencies and versions required for running this code
+├── downloader.py                # Small script to speed up downloading trial data as csv's from Tensorboard
+├── M1/                          # Directory containing code forked from https://github.com/LuminLiu/HierFL used to generate M1 results (Hierarchical FL vs Centralized FL)
+└── .gitignore                   # List of files to ignore when commiting to GitHub
 ```
 
 ### Results Folder
